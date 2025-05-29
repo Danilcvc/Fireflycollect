@@ -39,3 +39,56 @@ luac.out
 *.x86_64
 *.hex
 
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local localPlayer = Players.LocalPlayer
+
+
+local function teleportToRandomFireflyPart()
+	local character = localPlayer.Character
+	if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+	local parts = {}
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if obj:IsA("BasePart") and obj.Name == "FireflyPart" then
+			table.insert(parts, obj)
+		end
+	end
+
+	if #parts == 0 then
+		print("FireFly Not Found")
+		return
+	end
+
+
+	local randomPart = parts[math.random(1, #parts)]
+	character.HumanoidRootPart.CFrame = randomPart.CFrame + Vector3.new(0, 5, 0)
+
+
+	task.wait(0.2)
+
+
+	local backpack = localPlayer:FindFirstChild("Backpack")
+	local emptyJar = backpack and backpack:FindFirstChild("Empty Jar")
+	if emptyJar then
+		emptyJar.Parent = character -- берём в руки
+
+
+		task.wait(0.2)
+
+		-- Активируем инструмент (если поддерживает Activate)
+		if emptyJar:FindFirstChild("Activate") then
+			emptyJar:Activate()
+		end
+	else
+		print("Empty Jar Not Found")
+	end
+end
+
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if not gameProcessed and input.KeyCode == Enum.KeyCode.K then
+		teleportToRandomFireflyPart()
+	end
+end)
+
